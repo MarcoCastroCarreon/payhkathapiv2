@@ -3,9 +3,11 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
+    "build": "bun run build-functions.ts",
     "deploy": "bun run deploy.ts"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.125",
     "bun-types": "latest"
   },
   "peerDependencies": {
@@ -13,6 +15,9 @@
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.428.0",
-    "aws-sdk": "^2.1473.0"
+    "@middy/core": "^4.6.5",
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1473.0",
+    "mongoose": "^7.6.3"
   }
 }
