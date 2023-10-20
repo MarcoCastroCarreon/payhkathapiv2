@@ -1,4 +1,4 @@
-import { readdir, readFile, exists, mkdir } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import {
   LambdaClient,
   CreateFunctionCommand,
@@ -9,30 +9,13 @@ import {
   Runtime,
   Architecture,
 } from "@aws-sdk/client-lambda";
-import { execSync } from "child_process";
-
-function cleanFunctions(paths: string[]) {
-  execSync(`rm -rf ${paths.map((path) => `${path}/node_modules`)}`);
-}
 
 async function deployFunctions(): Promise<void> {
   try {
+    console.log(process.argv);
     const dirNames = await readdir("./functions");
 
-    cleanFunctions(dirNames.map((dir) => `./functions/${dir}`));
-
     for (const dirName of dirNames) {
-      const codePath = `./functions/${dirName}`;
-
-      const buildExists = await exists('./build');
-
-      if(!buildExists) {
-        mkdir('./build');
-      }
-
-      execSync(`cp -r ./node_modules ${codePath}`);
-
-      execSync(`zip -r ./build/${dirName}.zip ${codePath}/*`);
 
       const functionName = dirName;
 
@@ -44,13 +27,13 @@ async function deployFunctions(): Promise<void> {
         FunctionName: functionName,
       });
 
-      const getCommandResponse: ServiceException | any = await client
+      const getFnResponse: ServiceException | any = await client
         .send(getCommand)
         .catch((err) => err);
 
       let command: any;
 
-      if (getCommandResponse.$metadata.httpStatusCode == 404) {
+      if (getFnResponse.$metadata.httpStatusCode == 404) {
         command = new CreateFunctionCommand({
           Code: { ZipFile: zippedCode },
           FunctionName: functionName,
@@ -69,8 +52,6 @@ async function deployFunctions(): Promise<void> {
       }
 
       await client.send(command);
-
-      cleanFunctions([codePath]);
     }
   } catch (error) {
     throw error;
