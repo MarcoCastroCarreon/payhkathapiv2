@@ -4,7 +4,10 @@ import HttpResponse from "@utils/http-response";
 
 export default async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI ?? "");
+    console.log('Mongo connecting...');
+    console.log(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI as string, { dbName: 'paykath', connectTimeoutMS: 4000 });
+    console.log('Mongo Connected!');
   } catch (error: any) {
     console.error(`Connection Error: ${error.message}`);
     throw new HttpResponse({
