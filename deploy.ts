@@ -1,4 +1,4 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, exists } from "node:fs/promises";
 import {
   LambdaClient,
   CreateFunctionCommand,
@@ -11,73 +11,103 @@ import {
   UpdateFunctionConfigurationCommand,
 } from "@aws-sdk/client-lambda";
 
+const client = new LambdaClient();
+
+async function readAndDeploy(functionName: string, path: string) {
+  const zippedCode = await readFile(path);
+
+  const getCommand = new GetFunctionCommand({
+    FunctionName: functionName,
+  });
+
+  let command: any;
+  let updateConfigCommand: UpdateFunctionConfigurationCommand | null = null;
+
+  const getFnResponse: ServiceException | any = await client
+    .send(getCommand)
+    .catch((err) => err);
+
+  console.log(`Function Found:`, getFnResponse.$metadata.httpStatusCode == 200);
+
+  if (getFnResponse.$metadata.httpStatusCode == 404) {
+    console.log('Creation Command Setted...');
+    command = new CreateFunctionCommand({
+      Code: { ZipFile: zippedCode },
+      FunctionName: functionName,
+      Role: process.env.ARN_ROLE,
+      Architectures: [Architecture.arm64],
+      Handler: process.env.EXECUTION_HANDLER,
+      PackageType: PackageType.Zip,
+      Layers: [String(process.env.ARN_BUN_LAYER)],
+      Runtime: Runtime.providedal2,
+      Environment: {
+        Variables: {
+          MONGO_URI: process.env.MONGO_URI ?? "",
+        },
+      },
+      Timeout: 120,
+    });
+  } else {
+
+    console.log('Update Command Setted...');
+    command = new UpdateFunctionCodeCommand({
+      FunctionName: functionName,
+      ZipFile: zippedCode,
+    });
+
+    updateConfigCommand = new UpdateFunctionConfigurationCommand({
+      FunctionName: functionName,
+      Environment: {
+        Variables: {
+          MONGO_URI: process.env.MONGO_URI ?? "",
+        },
+      },
+      Handler: process.env.EXECUTION_HANDLER,
+      Role: process.env.ARN_ROLE,
+      Timeout: 120,
+    });
+  }
+
+  if (updateConfigCommand) {
+    console.log('Updating...')
+    await client.send(updateConfigCommand);
+    updateConfigCommand = null;
+  }
+
+  console.log('Sending Lambda Command...');
+  await client.send(command);
+}
+
 async function deployFunctions(): Promise<void> {
   try {
-    const dirNames = await readdir("./functions");
+    if (process.argv[2] == "-f" && process.argv[3]) {
+      const functionName = process.argv[3];
 
-    for (const dirName of dirNames) {
-      const functionName = dirName;
+      console.log(`Deploying.... ${functionName}`);
 
-      const zippedCode = await readFile(`./build/${functionName}.zip`);
+      const zipPath = `./build/${functionName}.zip`;
 
-      const client = new LambdaClient();
+      console.log(`Zip Path -> ${zipPath}`);
 
-      const getCommand = new GetFunctionCommand({
-        FunctionName: functionName,
-      });
+      const functionExists = await exists(zipPath);
 
-      const getFnResponse: ServiceException | any = await client
-        .send(getCommand)
-        .catch((err) => err);
+      if (!functionExists) throw new Error("Function zipped not found");
 
-      let command: any;
-      let updateConfigCommand: UpdateFunctionConfigurationCommand | null = null;
+      await readAndDeploy(functionName, zipPath);
+    } else {
+      const dirNames = await readdir("./functions");
 
-      if (getFnResponse.$metadata.httpStatusCode == 404) {
-        command = new CreateFunctionCommand({
-          Code: { ZipFile: zippedCode },
-          FunctionName: functionName,
-          Role: process.env.ARN_ROLE,
-          Architectures: [Architecture.arm64],
-          Handler: process.env.EXECUTION_HANDLER,
-          PackageType: PackageType.Zip,
-          Layers: [String(process.env.ARN_BUN_LAYER)],
-          Runtime: Runtime.providedal2,
-          Environment: {
-            Variables: {
-              MONGO_URI: process.env.MONGO_URI ?? "",
-            },
-          },
-          Timeout: 120000
-        });
-      } else {
-        command = new UpdateFunctionCodeCommand({
-          FunctionName: functionName,
-          ZipFile: zippedCode,
-        });
+      for (const dirName of dirNames) {
+        const functionName = dirName;
 
-        updateConfigCommand = new UpdateFunctionConfigurationCommand({
-          FunctionName: functionName,
-          Environment: {
-            Variables: {
-              MONGO_URI: process.env.MONGO_URI ?? "",
-            },
-          },
-          Handler: process.env.EXECUTION_HANDLER,
-          Role: process.env.ARN_ROLE,
-          Timeout: 120000
-        });
+        const zipPath = `./build/${functionName}.zip`;
+        await readAndDeploy(functionName, zipPath);
       }
-
-      if (updateConfigCommand) {
-        await client.send(updateConfigCommand);
-        updateConfigCommand = null;
-      }
-
-      await client.send(command);
     }
-  } catch (error) {
-    throw error;
+
+    console.log('Process Finished');
+  } catch (error: any) {
+    console.log(`Process Failed => ${error.message}`);
   }
 }
 
