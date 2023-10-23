@@ -6,7 +6,7 @@ function cleanFunctions(paths: string[]): void {
     `rm -rf ${paths
       .map(
         (path) =>
-          `${path}/node_modules ${path}/persistence ${path}/utils ${path}/tsconfig.json`
+          `${path}/node_modules ${path}/persistence ${path}/utils ${path}/tsconfig.json ${path}/services`
       )
       .reduce((prev, current) => {
         return `${prev} ${current}`;
