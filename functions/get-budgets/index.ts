@@ -2,15 +2,15 @@ import middy from "@middy/core";
 import connection from "@persistence/connection";
 import { HttpStatus } from "@utils/enums/http-status";
 import HttpResponse from "@utils/http-response";
-import { APIGatewayEvent, Context } from "aws-lambda";
+import { APIGatewayEvent } from "aws-lambda";
+import { BudgetsService } from "@services/budgets";
 
-async function handler(
-  request: APIGatewayEvent,
-  context: Context
-): Promise<Response> {
+async function handler(request: APIGatewayEvent): Promise<Response> {
+
+  const data = await BudgetsService.getBudgets();
+
   return new HttpResponse({
-    data: { context: context.callbackWaitsForEmptyEventLoop },
-    headers: { "Content-Type": "application/json" },
+    data,
     status: HttpStatus.OK,
   });
 }

@@ -22,7 +22,8 @@
     "paths": {
       "@persistence/*": ["./persistence/*"],
       "@models/*": ["./persistence/models/*"],
-      "@utils/*": ["./utils/*"]
+      "@utils/*": ["./utils/*"],
+      "@services/*": ["./services/*"]
     }
   }
 }
