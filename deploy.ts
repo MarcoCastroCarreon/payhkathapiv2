@@ -14,6 +14,7 @@ import {
 const client = new LambdaClient();
 
 async function readAndDeploy(functionName: string, path: string) {
+  console.log(`Deploying.... ${functionName}`);
   const zippedCode = await readFile(path);
 
   const getCommand = new GetFunctionCommand({
