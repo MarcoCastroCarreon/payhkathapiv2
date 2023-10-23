@@ -6,7 +6,7 @@ function cleanFunctions(paths: string[]): void {
     `rm -rf ${paths
       .map(
         (path) =>
-          `${path}/node_modules ${path}/persistence ${path}/utils ${path}/tsconfig.json`
+          `${path}/node_modules ${path}/persistence ${path}/utils ${path}/tsconfig.json ${path}/services`
       )
       .reduce((prev, current) => {
         return `${prev} ${current}`;
@@ -24,7 +24,7 @@ async function createBuildFolder(): Promise<void> {
 
 function buildZipFolder(path: string): void {
   execSync(
-    `cp -r ./node_modules ${path} && cp -r ./persistence ${path} && cp -r ./utils ${path} && cp tsconfig.json ${path}`
+    `cp -r ./node_modules ${path} && cp -r ./persistence ${path} && cp -r ./utils ${path} && cp tsconfig.json ${path} && cp -r ./services ${path}`
   );
 }
 
@@ -44,7 +44,7 @@ async function functionsCleanUp(cb: Function) {
 }
 
 function removeBuildFolder() {
-    execSync(`rm -rf ./build`);
+  execSync(`rm -rf ./build`);
 }
 
 (async () => {

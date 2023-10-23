@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, InferSchemaType } from "mongoose";
 
 const BudgetSquema: Schema = new Schema({
   date: String,
@@ -8,4 +8,5 @@ const BudgetSquema: Schema = new Schema({
   year: String,
 });
 
-export default model("Budget", BudgetSquema);
+export type Budget = InferSchemaType<typeof BudgetSquema>;
+export const BudgetModel = model("Budget", BudgetSquema);
