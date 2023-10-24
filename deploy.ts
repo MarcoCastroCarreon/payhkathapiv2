@@ -13,6 +13,13 @@ import {
 
 const client = new LambdaClient();
 
+const LAMBDA_TIMEOUT: number = process.env.LAMBDA_TIMEOUT
+  ? +process.env.LAMBDA_TIMEOUT
+  : 120;
+const LAMBDA_MEMORY_SIZE: number = process.env.LAMBDA_MEMORY_SIZE
+  ? +process.env.LAMBDA_MEMORY_SIZE
+  : 512;
+
 async function readAndDeploy(functionName: string, path: string) {
   console.log(`Deploying.... ${functionName}`);
   const zippedCode = await readFile(path);
@@ -31,7 +38,7 @@ async function readAndDeploy(functionName: string, path: string) {
   console.log(`Function Found:`, getFnResponse.$metadata.httpStatusCode == 200);
 
   if (getFnResponse.$metadata.httpStatusCode == 404) {
-    console.log('Creation Command Setted...');
+    console.log("Creation Command Setted...");
     command = new CreateFunctionCommand({
       Code: { ZipFile: zippedCode },
       FunctionName: functionName,
@@ -46,11 +53,11 @@ async function readAndDeploy(functionName: string, path: string) {
           MONGO_URI: process.env.MONGO_URI ?? "",
         },
       },
-      Timeout: 120,
+      Timeout: LAMBDA_TIMEOUT,
+      MemorySize: LAMBDA_MEMORY_SIZE,
     });
   } else {
-
-    console.log('Update Command Setted...');
+    console.log("Update Command Setted...");
     command = new UpdateFunctionCodeCommand({
       FunctionName: functionName,
       ZipFile: zippedCode,
@@ -65,17 +72,18 @@ async function readAndDeploy(functionName: string, path: string) {
       },
       Handler: process.env.EXECUTION_HANDLER,
       Role: process.env.ARN_ROLE,
-      Timeout: 120,
+      Timeout: LAMBDA_TIMEOUT,
+      MemorySize: LAMBDA_MEMORY_SIZE,
     });
   }
 
   if (updateConfigCommand) {
-    console.log('Updating...')
+    console.log("Updating...");
     await client.send(updateConfigCommand);
     updateConfigCommand = null;
   }
 
-  console.log('Sending Lambda Command...');
+  console.log("Sending Lambda Command...");
   await client.send(command);
 }
 
@@ -106,7 +114,7 @@ async function deployFunctions(): Promise<void> {
       }
     }
 
-    console.log('Process Finished');
+    console.log("Process Finished");
   } catch (error: any) {
     console.log(`Process Failed => ${error.message}`);
   }
