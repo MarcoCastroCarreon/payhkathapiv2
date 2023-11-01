@@ -2,12 +2,19 @@ import middy from "@middy/core";
 import connection from "@persistence/connection";
 import { HttpStatus } from "@utils/enums/http-status";
 import HttpResponse from "@utils/http-response";
-import { APIGatewayEvent } from "aws-lambda";
 import { BudgetsService } from "@services/budgets";
+import { Budget } from "@persistence/models/budget";
+import { IAWSRequest } from "@utils/types/aws-request.type";
 
-async function handler(request: APIGatewayEvent): Promise<Response> {
+async function handler(request: IAWSRequest): Promise<Response> {
 
-  const data = await BudgetsService.getBudgets();
+  let year
+
+  if(request.aws.queryStringParameters) {
+     year = request?.aws?.queryStringParameters?.year ? +request?.aws?.queryStringParameters?.year : new Date().getFullYear();
+  }
+
+  const data: Budget[] = await BudgetsService.getBudgets(year);
 
   return new HttpResponse({
     data,
@@ -15,4 +22,4 @@ async function handler(request: APIGatewayEvent): Promise<Response> {
   });
 }
 
-export const execute = middy().handler(handler).before(connection);
+export const execute = middy(handler).before(connection);
