@@ -3,10 +3,10 @@ import connection from "@persistence/connection";
 import { HttpStatus } from "@utils/enums/http-status";
 import HttpResponse from "@utils/http-response";
 import { BudgetsService } from "@services/budgets";
-import { Budget } from "@persistence/models/budget";
+import { BudgetSquema } from "@persistence/models/budget";
 import { IAWSRequest } from "@utils/types/aws-request.type";
 
-async function handler(request: IAWSRequest): Promise<Response> {
+async function handler(request: IAWSRequest<any>): Promise<Response> {
 
   let year
 
@@ -14,7 +14,7 @@ async function handler(request: IAWSRequest): Promise<Response> {
      year = request?.aws?.queryStringParameters?.year ? +request?.aws?.queryStringParameters?.year : new Date().getFullYear();
   }
 
-  const data: Budget[] = await BudgetsService.getBudgets(year);
+  const data: BudgetSquema[] = await BudgetsService.getBudgets(year);
 
   return new HttpResponse({
     data,
