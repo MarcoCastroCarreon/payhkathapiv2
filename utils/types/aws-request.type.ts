@@ -1,7 +1,9 @@
 import { APIGatewayEvent } from 'aws-lambda';
 
-interface AWSObject extends APIGatewayEvent {}
+interface AWSObject<T> extends APIGatewayEvent {
+    body: T | any
+}
 
-export interface IAWSRequest {
-    aws: AWSObject
+export interface IAWSRequest<T> {
+    aws: AWSObject<T>
 }
