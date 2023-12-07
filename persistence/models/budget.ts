@@ -3,22 +3,23 @@ import { Payment, PaymentSquema } from "./payment";
 
 const BudgetSquema: Schema = new Schema({
   date: String,
-  budget: String,
-  totalPayment: String,
-  remaining: String,
-  year: String,
+  budget: Number,
+  totalPayment: Number,
+  remaining: Number,
+  year: Number,
   paymentsList: [PaymentSquema],
-  exceeded: String
+  exceeded: Number
 });
 
 export type BudgetSquema = InferSchemaType<typeof BudgetSquema>;
 export type Budget = {
+  _id?: string,
   date: string,
-  budget: string,
-  totalPayment: string,
-  remaining: string,
-  year: string,
+  budget: Number,
+  totalPayment: Number,
+  remaining: Number,
+  year: Number,
   paymentsList: Payment[],
-  exceeded: string
+  exceeded: Number
 };
 export const BudgetModel = model("Budget", BudgetSquema);
