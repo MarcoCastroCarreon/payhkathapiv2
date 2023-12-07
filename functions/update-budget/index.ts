@@ -6,6 +6,8 @@ import { HttpStatus } from "@utils/enums/http-status";
 import { Budget } from "@persistence/models/budget";
 import { BudgetsService } from "@services/budgets";
 import HttpError from "@utils/errors/http-error";
+import manageZodError from "@utils/validators/manage-zod-error";
+import updateBudgetSchema from "@utils/validators/update-budget-body.schema";
 
 type UpdateBudgetQueryParams = { budgetId: string };
 
@@ -23,7 +25,13 @@ async function handler(
       );
     }
 
-    const body: Omit<Budget, '_id'> = JSON.parse(request?.aws?.body ?? "{}");
+    const body: Omit<Budget, "_id"> = JSON.parse(request?.aws?.body ?? "{}");
+
+    const validate = await updateBudgetSchema.spa(body);
+
+    if (!validate.success) {
+      return manageZodError(validate.error);
+    }
 
     await BudgetsService.updateBudget(queryParams.budgetId, body);
 
@@ -36,6 +44,4 @@ async function handler(
   }
 }
 
-export const execute = middy()
-  .handler(handler)
-  .before(connection);
+export const execute = middy(handler).before(connection);
