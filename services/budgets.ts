@@ -29,6 +29,18 @@ export namespace BudgetsService {
     }
   }
 
+  export async function createBudget(data: Budget): Promise<BudgetSquema> {
+    try {
+      const budget = new BudgetModel(data);
+
+      await budget.save();
+
+      return budget;
+    } catch (error: any) {
+      throw new HttpError(error.status, error.message);
+    }
+  }
+
   export async function updateBudget(
     _id: string,
     budget: Omit<Budget, "_id">
@@ -53,9 +65,9 @@ export namespace BudgetsService {
         "_id" | "year" | "paymentsList" | "date"
       > = {
         budget,
-        remaining: "0",
-        totalPayment: "0",
-        exceeded: "0",
+        remaining: 0,
+        totalPayment: 0,
+        exceeded: 0,
       };
 
       const totalPayment: number = paymentsList.reduce(
@@ -69,9 +81,9 @@ export namespace BudgetsService {
 
       const exceeded: number = result < 0 ? result * -1 : 0;
 
-      calculatedBudget.totalPayment = String(totalPayment);
-      calculatedBudget.remaining = String(remaining);
-      calculatedBudget.exceeded = String(exceeded);
+      calculatedBudget.totalPayment = totalPayment;
+      calculatedBudget.remaining = remaining;
+      calculatedBudget.exceeded = exceeded;
 
       return calculatedBudget;
     } catch (error: any) {
