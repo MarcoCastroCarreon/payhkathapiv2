@@ -114,6 +114,7 @@ async function deployFunctions(): Promise<void> {
       }
     }
 
+    
     console.log("Process Finished");
   } catch (error: any) {
     console.log(`Process Failed => ${error.message}`);

@@ -1,12 +1,25 @@
 import { Schema, model, InferSchemaType } from "mongoose";
+import { Payment, PaymentSquema } from "./payment";
 
 const BudgetSquema: Schema = new Schema({
   date: String,
-  budget: String,
-  totalPayment: String,
-  remaining: String,
-  year: String,
+  budget: Number,
+  totalPayment: Number,
+  remaining: Number,
+  year: Number,
+  paymentsList: [PaymentSquema],
+  exceeded: Number
 });
 
-export type Budget = InferSchemaType<typeof BudgetSquema>;
+export type BudgetSquema = InferSchemaType<typeof BudgetSquema>;
+export type Budget = {
+  _id?: string,
+  date: string,
+  budget: Number,
+  totalPayment: Number,
+  remaining: Number,
+  year: Number,
+  paymentsList: Payment[],
+  exceeded: Number
+};
 export const BudgetModel = model("Budget", BudgetSquema);
