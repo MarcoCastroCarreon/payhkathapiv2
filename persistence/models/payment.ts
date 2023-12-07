@@ -1,7 +1,7 @@
 import { Schema, model, InferSchemaType } from "mongoose";
 
-enum PaymentType {
-  PAYMENT = "payment",
+export enum PaymentType {
+  PAYMENT = "PAYMENT",
   DOUBT = "DOUBT",
 }
 
