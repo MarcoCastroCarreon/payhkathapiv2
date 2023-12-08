@@ -13,18 +13,37 @@ export namespace ExpensesService {
         }
     }
 
-    export async function createExpenses(expenses: Omit<Expense, '_id'>[]) {
+    export async function manageExpenses(budgetId: string, expenses: Expense[]) {
         try {
 
-            const expensesToBeCreated: ExpenseSchema[] = [];
-            for (const expense of expenses) {
-                const nExpense = new ExpenseModel(expense);
+            const records = await ExpenseModel.find({ budgetId }).exec();
 
-                expensesToBeCreated.push(nExpense);
+            const expensesToUpdate = expenses.filter(expense => expense._id);
+
+
+            const recordsToEliminate: ExpenseSchema[] = [];
+            for (const record of records) {
+                const founded = expensesToUpdate.find(expense => expense._id == record._id);
+
+                if(!founded) recordsToEliminate.push(record);
             }
-            await ExpenseModel.insertMany(expensesToBeCreated);
 
-            return expensesToBeCreated;
+            await ExpenseModel.deleteMany({ _id: recordsToEliminate.map(record => record._id)});
+
+            const expensesToCreate = expenses.filter(expense => !expense._id);
+
+            await ExpenseModel.insertMany(expensesToCreate);
+            
+            for (const expenseToUpdate of expensesToUpdate) {
+                const expense = new ExpenseModel(expenseToUpdate);
+
+                await expense.save();
+            }
+
+            return {
+                created: expensesToCreate,
+                updated: expensesToUpdate
+            }
         } catch (error: any) {
             throw new HttpError(error.status, error.message);
         }
