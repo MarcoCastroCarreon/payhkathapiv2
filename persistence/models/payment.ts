@@ -7,7 +7,7 @@ export enum PaymentType {
 
 export const PaymentSquema: Schema = new Schema({
   name: String,
-  payment: String,
+  payment: Number,
   paid: Boolean,
   type: String,
   budgetId: String,
@@ -16,7 +16,7 @@ export const PaymentSquema: Schema = new Schema({
 export type PaymentSquemaType = InferSchemaType<typeof PaymentSquema>;
 export type Payment = {
   name: string;
-  payment: string;
+  payment: Number;
   paid: boolean;
   type: PaymentType;
   budgetId: string;

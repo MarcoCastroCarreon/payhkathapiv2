@@ -11,6 +11,11 @@ const BudgetSquema: Schema = new Schema({
   exceeded: Number
 });
 
+BudgetSquema.pre('save', function() {
+    this.budget = Number(this.budget);
+    this.totalPayment = Number(this.totalPayment);
+});
+
 export type BudgetSquema = InferSchemaType<typeof BudgetSquema>;
 export type Budget = {
   _id?: string,
