@@ -14,10 +14,10 @@ export async function handler(
       request.aws?.body ?? "{}"
     );
 
-    const createdExpenses = await ExpensesService.createExpenses(reqBody);
+    const expenses = await ExpensesService.manageExpenses(reqBody);
 
     return new HttpResponse({
-      data: createdExpenses,
+      data: expenses,
       status: HttpStatus.CREATED,
     });
   } catch (error: any) {
