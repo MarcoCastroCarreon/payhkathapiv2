@@ -29,7 +29,7 @@ const updateBudgetSchema = object({
   paymentsList: array(
     object({
       name: string().min(1),
-      payment: string().min(1),
+      payment: number().min(1),
       paid: boolean().default(false),
       type: PaymentTypeEnum,
       budgetId: string(),
