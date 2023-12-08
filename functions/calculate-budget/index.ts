@@ -4,7 +4,7 @@ import { HttpStatus } from '@utils/enums/http-status';
 import type { Budget } from '@models/budget';
 import { BudgetsService } from "@services/budgets";
 
-export async function execute(request: IAWSRequest<Pick<Budget, 'paymentsList'>>): Promise<Response> {
+export async function execute(request: IAWSRequest<Pick<Budget, 'paymentsList'>, any>): Promise<Response> {
   const reqBody: Pick<Budget, 'budget' | 'paymentsList'> = JSON.parse(request.aws?.body ?? '{}') ;
 
   const calculatedBudget = BudgetsService.calculate(reqBody);
