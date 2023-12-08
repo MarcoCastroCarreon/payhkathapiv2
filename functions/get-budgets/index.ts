@@ -6,12 +6,17 @@ import { BudgetsService } from "@services/budgets";
 import { BudgetSquema } from "@persistence/models/budget";
 import { IAWSRequest } from "@utils/types/aws-request.type";
 
-async function handler(request: IAWSRequest<any>): Promise<Response> {
+async function handler(
+  request: IAWSRequest<any, { year: number }>
+): Promise<Response> {
+  let year: number;
 
-  let year
-
-  if(request.aws.queryStringParameters) {
-     year = request?.aws?.queryStringParameters?.year ? +request?.aws?.queryStringParameters?.year : new Date().getFullYear();
+  if (request?.aws?.queryStringParameters) {
+    year = request?.aws?.queryStringParameters?.year
+      ? +request?.aws?.queryStringParameters?.year
+      : new Date().getFullYear();
+  } else {
+    year = new Date().getFullYear()
   }
 
   const data: BudgetSquema[] = await BudgetsService.getBudgets(year);
