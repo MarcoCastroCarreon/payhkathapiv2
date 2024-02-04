@@ -33,7 +33,7 @@ export namespace BudgetsService {
     try {
       const budget = new BudgetModel(data);
 
-      await budget.save();
+      await BudgetModel.create(budget);
 
       return budget;
     } catch (error: any) {
