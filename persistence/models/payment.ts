@@ -16,7 +16,7 @@ export const PaymentSquema: Schema = new Schema({
 export type PaymentSquemaType = InferSchemaType<typeof PaymentSquema>;
 export type Payment = {
   name: string;
-  payment: Number;
+  payment: number;
   paid: boolean;
   type: PaymentType;
   budgetId: string;
