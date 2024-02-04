@@ -6,6 +6,8 @@ import { Expense } from "@persistence/models/expense";
 import middy from "@middy/core";
 import connection from "@persistence/connection";
 import HttpError from "@utils/errors/http-error";
+import expensesBodySchema from "@utils/validators/handle-expenses-body.schema";
+import manageZodError from "@utils/validators/manage-zod-error";
 
 export async function handler(
   request: IAWSRequest<Omit<Expense, "_id">[], { budgetId: string }>
@@ -15,7 +17,13 @@ export async function handler(
       request.aws?.body ?? "{}"
     );
 
-    if (request.aws?.queryStringParameters?.budgetId) {
+    const validate = await expensesBodySchema.spa(reqBody);
+
+    if (!validate.success) {
+      return manageZodError(validate.error);
+    }
+
+    if (!request.aws?.queryStringParameters?.budgetId) {
       throw new HttpError(
         HttpStatus.BAD_REQUEST,
         "Budget Id is required in query parameters"
