@@ -11,20 +11,15 @@ const BudgetSquema: Schema = new Schema({
   exceeded: Number
 });
 
-BudgetSquema.pre('save', function() {
-    this.budget = Number(this.budget);
-    this.totalPayment = Number(this.totalPayment);
-});
-
 export type BudgetSquema = InferSchemaType<typeof BudgetSquema>;
 export type Budget = {
   _id?: string,
   date: string,
-  budget: Number,
-  totalPayment: Number,
-  remaining: Number,
-  year: Number,
+  budget: number,
+  totalPayment: number,
+  remaining: number,
+  year: number,
   paymentsList: Payment[],
-  exceeded: Number
+  exceeded: number
 };
 export const BudgetModel = model("Budget", BudgetSquema);
