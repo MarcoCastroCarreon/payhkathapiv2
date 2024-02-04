@@ -27,6 +27,7 @@ async function handler(
       status: HttpStatus.CREATED,
     });
   } catch (error: any) {
+    console.log('Controller Error', error);
     return error;
   }
 }
